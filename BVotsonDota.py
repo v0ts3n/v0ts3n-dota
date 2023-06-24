@@ -1,10 +1,10 @@
-#B_Votson Dota Bot v3.6.6
+#B_Votson Dota Bot v3.6.8
 #Все права на бота пренадлежат B_Votson Team. В случае нарушения авторских прав автор в праве набить вам ебальник
-#Создано совмесно с системой умного дома Nerif Project.
 #Офф. сайт: http://bvotsonteam.alwaysdata.net
 #Офф. сайт Nerif Project: http://nerifproject.22web.org
 
-
+#ACCOUNTS INFO
+#CHANGE IT IF YOU WANT TO USE BOT IN YOUR GROUP
 import configparser
 import os
 # Создаем объект configparser
@@ -13,17 +13,16 @@ config = configparser.ConfigParser()
 
 
 file_path = "BVotsonDota.ini"
-#ACCOUNTS INFO
-#CHANGE IT IF YOU WANT TO USE BOT IN YOUR GROUP
+
 if not os.path.isfile(file_path):
 
 
-    #enter your user data for first usage
-    account_userName = ['@username']
-    accounts_list = [12345678]#Steam account id's
-    chatId_list = [12345678]#telegram chat id's
-    is_alive = [False, False, False, False, False, False] #don't touch
-    groups_register = []#groups_chat_id's
+    print("1")
+    account_userName = ['@B_Vatsan']
+    accounts_list = [123123123]
+    chatId_list = [123321]
+    is_alive = [False, False, False, False, False, False]
+    groups_register = []
     config['DotaPlayers'] = {'account_userName': str(account_userName), 'accounts_list': str(accounts_list), "chatId_list": str(chatId_list), "is_alive": str(is_alive)}
     # Сохраняем изменения в файле
     with open('BVotsonDota.ini', 'w') as configfile:
@@ -50,28 +49,18 @@ import requests
 import json
 import asyncio
 from aiogram import Bot, Dispatcher, types
-from aiogram.types import Message, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import Message, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup,WebAppInfo
 from aiogram.utils import executor
 
 
 matchidDota = ''
 logging.basicConfig(level=logging.INFO)
 datadoto = ''
-
-#=========================================TELEGRAM-API-TOKEN=============================
-
-
-API_TOKEN = ''     
-
-
-
-#========================================================================================
-
-
+API_TOKEN = 'YOUR-BOT-TOKEN'
 #pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
-
+'''==========================================ВОЗМОЖНА ПЕРЕРАБОТКА
 def check_mmrs():
     url1 = 'https://api.opendota.com/api/players/' + str(accounts_list[0])
     url2 = 'https://api.opendota.com/api/players/' + str(accounts_list[1])
@@ -92,19 +81,40 @@ def check_mmrs():
     return rankTier1, rankTier2, rankTier3, rankTier4
     #except Exception:
     #    print("[Coused Error] Coused error in mmr updater function. Error: " + str(Exception))
+async def ranks_update():
+    halgheen_pre, koban_pre, bv_pre, votson_pre = check_mmrs()
+    while True:
+        print(check_mmrs())
+        hallgheen, kobanchik, bv, votson = check_mmrs()
+        if hallgheen != halgheen_pre:
+            halgheen_pre = hallgheen
+            s = requests.get("https://api.telegram.org/bot5965011484:AAFCpplJfAzio6Eieapdbl1PZxhVfxUnyZU/sendMessage?chat_id=-1001571677403&text=У пользователя @hallgheen новый ранг! Поздравляем его!")   
+        if kobanchik != koban_pre:
+            koban_pre = kobanchik            
+            s = requests.get("https://api.telegram.org/bot5965011484:AAFCpplJfAzio6Eieapdbl1PZxhVfxUnyZU/sendMessage?chat_id=-1001571677403&text=У пользователя @Kob2n4ik новый ранг! Поздравляем его!")   
+        if bv != bv_pre:
+            bv_pre = bv
+            s = requests.get("https://api.telegram.org/bot5965011484:AAFCpplJfAzio6Eieapdbl1PZxhVfxUnyZU/sendMessage?chat_id=-1001571677403&text=У пользователя @B_Votson новый ранг! Поздравляем его!")
+        if votson != votson_pre:
+            votson_pre = votson
+            s = requests.get("https://api.telegram.org/bot5965011484:AAFCpplJfAzio6Eieapdbl1PZxhVfxUnyZU/sendMessage?chat_id=-1001571677403&text=У пользователя @Vots0n новый ранг! Поздравляем его!")
+        asyncio.sleep(5)        
+'''
 
-  
 
+#Пооверить соотвествие чатида к аккаунту стима
 
-
-#Мертвая функция старого определения игры. Не использовать.
-def getmatchid():
-    image = pyautogui.screenshot("screen.png", region=(235, 651, 60, 50))
-
-    image = Image.open("screen.png")
-    matchpre = pytesseract.image_to_string(image, config='digits')
-    print(matchpre)
-    return matchpre
+def isYourAccount(chatid, steamid):
+    for i in chatId_list:
+        if i == chatid:
+            nowsNum = chatId_list.index(i)
+            for j in accounts_list:
+                if steamid == j:
+                    nowsNumSteam = accounts_list.index(j)
+    if nowsNum == nowsNumSteam:
+        return True
+    else:
+        return False
 
 def changePollingForChat_Id(id):
     for i in chatId_list:
@@ -305,7 +315,7 @@ def startpolling(mode, id):
         
         url = 'https://api.opendota.com/api/players/' + str(userId) + '/recentMatches'
         response = requests.get(url)
-        
+        party_size = response.json()[0]['party_size']
         tower_dmg = response.json()[0]['tower_damage']
         hero_dmg = response.json()[0]['hero_damage']
         gpm = response.json()[0]['gold_per_min']
@@ -315,7 +325,7 @@ def startpolling(mode, id):
         global matchidDota
         matchidDota = matchidNeed
         print(matchidDota)
-        datadoto = str(emoji.emojize(":check_mark_button:")) + "B_Votson Team" + str(emoji.emojize(":check_mark_button:")) + "\n" + str(emoji.emojize(":ID_button:")) + "Матч №"+str(matchidNeed)+"\n" + str(emoji.emojize(":timer_clock:")) + "Время первой крови: " + str(first_blood) + "\n" + str(emoji.emojize(":skull:")) + "Счет игры: " + str(allKill) + "\n" + str(emoji.emojize(":timer_clock:")) + "Длительность матча: " + str(allTime) + "\n" + str(emoji.emojize(":loudspeaker:")) + "Играл за: " + teamPlayer + "\n"  + str(emoji.emojize(":loudspeaker:")) + "Результат: победа " + teamwin + "\n" + str(emoji.emojize(":man_superhero:")) + "На герое: " + str(new_id) + "\n" + str(emoji.emojize(":baby_dark_skin_tone:")) + "Урон по героям игрока: " + str(hero_dmg) + "\n" + str(emoji.emojize(":Tokyo_tower:")) + "Урон по постройкам: " + str(tower_dmg) + "\n" + str(emoji.emojize(":check_mark_button:") + "КДА: " + str(kda) + "\n" + str(emoji.emojize(":money_bag:")) + "ГПМ: " + str(gpm) + "\n" + str(emoji.emojize(":money_bag:")) + "НЕТВОРС: " + str(networse))
+        datadoto = str(emoji.emojize(":check_mark_button:")) + "B_Votson Team" + str(emoji.emojize(":check_mark_button:")) + "\n" + str(emoji.emojize(":ID_button:")) + "Матч №"+str(matchidNeed)+"\n" + str(emoji.emojize(":timer_clock:")) + "Время первой крови: " + str(first_blood) + "\n" + str(emoji.emojize(":skull:")) + "Счет игры: " + str(allKill) + "\n" + str(emoji.emojize(":timer_clock:")) + "Длительность матча: " + str(allTime) + "\n" + str(emoji.emojize(":loudspeaker:")) + "Играл за: " + teamPlayer + "\n"  + str(emoji.emojize(":loudspeaker:")) + "Результат: победа " + teamwin + "\n" + str(emoji.emojize(":man_superhero:")) + "На герое: " + str(new_id) + "\n" + str(emoji.emojize(":baby_dark_skin_tone:")) + "Урон по героям игрока: " + str(hero_dmg) + "\n" + str(emoji.emojize(":Tokyo_tower:")) + "Урон по постройкам: " + str(tower_dmg) + "\n" + str(emoji.emojize(":check_mark_button:") + "КДА: " + str(kda) + "\n" + str(emoji.emojize(":money_bag:")) + "ГПМ: " + str(gpm) + "\n" + str(emoji.emojize(":money_bag:")) + "НЕТВОРС: " + str(networse) + str(emoji.emojize(":money_bag:")) + "\n" + str(emoji.emojize(":check_mark_button:")) + str("Размер Пати: ") + str(party_size) + str(emoji.emojize(":check_mark_button:")))
         
         return gpm, kda2
 
@@ -395,7 +405,7 @@ async def send_welcome(message: types.Message):
     keyboard.add(button2)
     keyboard.add(button3)
 
-    await message.reply("Dota Bot v3.6.4 \nBy B_Votson Team", reply_markup=keyboard)
+    await message.reply("Dota Bot v3.6.7 \nBy B_Votson Team", reply_markup=keyboard)
 
 @dp.message_handler(commands=['recentmatches'])
 async def recent(msg: types.Message):
@@ -428,38 +438,39 @@ async def new_player(msg: types.Message):
 @dp.message_handler(commands=['addnewgroup'])
 async def new_player(msg: types.Message):
     #groups_register.insert
-    if msg.from_user.id == 936106535:
-        groups_register.insert(len(groups_register), int(msg.chat.id))
-        config['DotaPlayers'] = {'account_userName': str(account_userName), 'accounts_list': str(accounts_list), "chatId_list": str(chatId_list), "is_alive": str(is_alive), "groups_register": str(groups_register)}
+    
+    groups_register.insert(len(groups_register), int(msg.chat.id))
+    config['DotaPlayers'] = {'account_userName': str(account_userName), 'accounts_list': str(accounts_list), "chatId_list": str(chatId_list), "is_alive": str(is_alive), "groups_register": str(groups_register)}
             # Сохраняем изменения в файле
-        with open('BVotsonDota.ini', 'w') as configfile:
-            config.write(configfile)
-        await msg.answer("В базу данных добавлена новая группа.")
-    else:
-        await msg.reply("У вас нет прав для использования данной команды")
+    with open('BVotsonDota.ini', 'w') as configfile:
+        config.write(configfile)
+    await msg.answer("В базу данных добавлена новая группа.")
+    
+    
+
 @dp.message_handler(commands=['recend'])
 async def new_player(msg: types.Message):
     global groups_register
     if msg.from_user.id == 936106535:
         command = msg.get_full_command()
         text = command[1]
-        words = text.replace('_', ' ')
+        #words = text.replace('_', ' ')
 
         for i in chatId_list:
             
             try:
-                await bot.send_message(i, words)
-            except Exception:
-                await msg.answer("Не удалось отправить сообщение " + str(i))
+                await bot.send_message(i, text)
+            except Exception as e:
+                await msg.answer("Не удалось отправить сообщение " + str(i) + str(e))
             
         for j in groups_register:
             #print(j)
             #await msg.answer(groups_register)  
             try:
 
-                await bot.send_message(j, words)
+                await bot.send_message(j, text)
             except Exception:
-                await msg.answer("Не удалось отправить " + str(j))
+                await msg.answer("Не удалось отправить " + str(j) + str(e))
         
         await msg.answer("Рассылка создана.")
     else:
@@ -500,11 +511,13 @@ async def prematchsend(msg: types.Message):
         await msg.answer_sticker(r'CAACAgIAAxkBAAEIi1hkNXDw3Cb42bhbthJqGSRRwo_2JwACYwEAAntOKhBTVm71ygpsCy8E')
         await msg.reply("Вы указали неправильный username либо же его не существует")
 
+"""
 @dp.message_handler(commands=['mmrpolling'])
 async def start_polingmmrs(msg: types.Message):
     t1 = Thread(target=ranks_update)
     t1.start()
     await msg.answer("Начата авто-обработка рангов. ")
+"""
 
 @dp.message_handler(commands=["createupdater"])
 async def create_updater(msg: types.Message):
@@ -528,12 +541,18 @@ async def send_profile(msg: types.Message):
         
         res = requests.get("https://api.opendota.com/api/players/" + str(profile_id) + "/wl?limit=20")
         wrlast = int(res.json()["win"]) / 20 * 100
-
+        
 
         wrlast = int(wrlast)
-        await msg.reply(emoji.emojize(":check_mark_button:") + "B_Votson Team" + str(emoji.emojize(":check_mark_button:")) + "\n" + "Имя профиля: " + str(profileName) + "\n" + "RANK: " + str(rank) + "\n" + "Входил в сеть последний раз: " + str(lastLogin) + "\nВинрейт за последние 20 игр: " + str(wrlast) + "%")
+        ishisaccount = isYourAccount(msg.from_user.id, profile_id)
+        
+        button = InlineKeyboardButton(text='Коментарий к профилю BVotson Dota', web_app=WebAppInfo(url="https://bvotsonteam.alwaysdata.net/profile_dota.php?profile=" + str(profile_id)))
+        keyboard = InlineKeyboardMarkup().add(button)
+
+        await msg.reply(emoji.emojize(":check_mark_button:") + "B_Votson Team" + str(emoji.emojize(":check_mark_button:")) + "\n" + "Имя профиля: " + str(profileName) + "\n" + "RANK: " + str(rank) + "\n" + "Входил в сеть последний раз: " + str(lastLogin) + "\nВинрейт за последние 20 игр: " + str(wrlast) + "%", reply_markup=keyboard)
         hero, match_id = get_lastmatch(profile_id)
         await bot.send_message(msg.chat.id, "Последний сыграный матч: №" + str(match_id) + ", на герое " + str(hero))
+    
     if profile_id == None:
         await msg.reply("Вы указали неправильный username либо же его не существует")
 
@@ -559,11 +578,11 @@ async def send_last_match(message: types.Message):
         print(gpm, kda)
         if gpm <= 500:
             #CAACAgIAAxkBAAEIi2hkNXKNztUFEiyZpW24bMnhGSwutAACICcAAs0eKEgAAZtRGNXVf7UvBA
-            await message.answer_sticker(r'CAACAgIAAxkBAAEIi2hkNXKNztUFEiyZpW24bMnhGSwutAACICcAAs0eKEgAAZtRGNXVf7UvBA')
-            await message.reply("Папа вами не доволен. Че по гпму, ало")
+            #await message.answer_sticker(r'CAACAgIAAxkBAAEIi2hkNXKNztUFEiyZpW24bMnhGSwutAACICcAAs0eKEgAAZtRGNXVf7UvBA')
+            await message.reply("Че по гпму, ало")
         if kda < 2:
-            await message.reply("Папа вами не доволен. Че по кда, чучело")
-            await message.answer_sticker(r'CAACAgIAAxkBAAEIi2xkNXQKVPXUX7jppqxlXAGMH00ikgACvycAArLU0UocBE2-dWq6LC8E')
+            await message.reply("Че по кда, чучело")
+            #await message.answer_sticker(r'CAACAgIAAxkBAAEIi2xkNXQKVPXUX7jppqxlXAGMH00ikgACvycAArLU0UocBE2-dWq6LC8E')
     if profile_id == None:
         await message.answer_sticker(r'CAACAgIAAxkBAAEIi1hkNXDw3Cb42bhbthJqGSRRwo_2JwACYwEAAntOKhBTVm71ygpsCy8E')
         await message.reply("Вы указали неправильный username либо же его не существует")
@@ -582,7 +601,7 @@ async def send_last_match(message: types.Message):
     
     
     await message.reply("Ваш последний матч: \n" + datadoto, reply_markup=keyboard)
-
+'''=====================УДАЛЕННАЯ ФУНКЦИЯ, ВОЗМОЖНА ПЕРЕРАБОТКА В НОВЫХ ВЕРСИЯХ
 @dp.message_handler(commands=['newRoshan'])
 async def send_roshan(msg: types.Message):
     await msg.reply("Создаються новые тайминги роши, ожидайте....")
@@ -598,7 +617,7 @@ async def send_roshan(msg: types.Message):
     await msg.reply("Возможный тайминг рошана(Средний тайминг) " + upom + " " + upom + " " + upom + " " + upom)
     await asyncio.sleep(660)
     await msg.reply("Возможный тайминг рошана(Конечный тайминг) " + upom + " " + upom + " " + upom + " " + upom)
-
+'''
 def checkwinrate(id, hero):
     res = requests.get("https://api.opendota.com/api/players/" + str(id) + "/heroes")
     
